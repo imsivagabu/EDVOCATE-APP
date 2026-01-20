@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EDVOCATE - Infrastructure Pitch 2026</title>
+    <meta name="description" content="India's Career Decision Infrastructure Pitch Deck">
     
+    <!-- Favicon (SVG Data URI) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,24 +26,27 @@
                     colors: {
                         brand: {
                             DEFAULT: '#4361EE',
-                            dark: '#3651CD',
+                            light: '#E0E7FF',
                         }
                     },
                     animation: {
-                        'gradient-x': 'gradient-x 15s ease infinite',
+                        'blob': 'blob 10s infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 6s ease-in-out 3s infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     },
                     keyframes: {
-                        'gradient-x': {
-                            '0%, 100%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'left center'
-                            },
-                            '50%': {
-                                'background-size': '200% 200%',
-                                'background-position': 'right center'
-                            },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         },
-                    },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
                 }
             }
         }
@@ -52,26 +59,77 @@
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Lucide Icons (Vanilla Version - Safer for inline React generation) -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         body {
             font-family: 'Averia Serif Libre', serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            overflow: hidden; 
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9; 
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1; 
-            border-radius: 4px;
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #4361EE;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(67, 97, 238, 0.15);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8; 
+
+        .text-gradient {
+            background: linear-gradient(135deg, #4361EE 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animation Classes */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-up.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-zoom {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal-zoom.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .bar-grow {
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .bar-grow.active {
+            transform: scaleY(1);
         }
     </style>
 </head>
@@ -79,12 +137,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        // Destructure globals from CDNs
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, createContext, useContext } = React;
 
-        // --- Custom Lucide Icon Wrapper ---
-        // Converts vanilla Lucide icon definitions into React components
-        // This avoids UMD dependency issues with lucide-react in simple HTML files
+        // --- Icon Wrapper ---
         const IconWrapper = ({ iconNode, size = 24, className = "", ...props }) => {
             return React.createElement(
                 "svg",
@@ -107,726 +162,532 @@
             );
         };
 
-        // Create a map of React components from lucide.icons
         const LucideIcons = Object.keys(lucide.icons).reduce((acc, key) => {
             acc[key] = (props) => React.createElement(IconWrapper, { ...props, iconNode: lucide.icons[key] });
             return acc;
         }, {});
 
-        // Destructure only the icons we need
         const { 
-            ArrowRight, 
-            Target, 
-            Brain, 
-            MapPin, 
-            Users, 
-            TrendingUp, 
-            ShieldCheck, 
-            Layers, 
-            School, 
-            Briefcase, 
-            ChevronDown, 
-            BarChart3, 
-            Cpu, 
-            Globe, 
-            Award, 
-            CheckCircle, 
-            Mail, 
-            Zap, 
-            Activity 
+            ArrowRight, Target, Brain, MapPin, Users, TrendingUp, ShieldCheck, 
+            Layers, School, Briefcase, ChevronDown, BarChart3, Cpu, Globe, 
+            Award, CheckCircle, Mail, Zap, Activity, AlertTriangle 
         } = LucideIcons;
 
-        // --- Animation Components ---
+        // --- Context for Slide Visibility ---
+        const SlideContext = createContext(false);
 
-        const Reveal = ({ children, className = "", delay = 0, threshold = 0.1 }) => {
+        // --- Components ---
+
+        const LiquidBackground = () => (
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-slate-50">
+                {/* Lighter colors (-200/100) and reduced opacity (0.4) for better text contrast */}
+                <div className="absolute top-0 left-[-10%] w-[40rem] h-[40rem] bg-purple-200 rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob"></div>
+                <div className="absolute top-0 right-[-10%] w-[35rem] h-[35rem] bg-blue-200 rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-[-10%] left-[20%] w-[45rem] h-[45rem] bg-pink-200 rounded-full mix-blend-multiply filter blur-[80px] opacity-40 animate-blob" style={{ animationDelay: '4s' }}></div>
+                <div className="absolute bottom-[20%] right-[10%] w-[30rem] h-[30rem] bg-cyan-100 rounded-full mix-blend-multiply filter blur-[60px] opacity-40 animate-blob" style={{ animationDelay: '6s' }}></div>
+            </div>
+        );
+
+        const Navbar = ({ activeIndex, totalSlides }) => (
+            <nav className="fixed top-0 w-full z-50 p-6 flex justify-between items-center transition-opacity duration-500">
+                <div className="flex items-center gap-0 cursor-pointer hover:scale-105 transition-transform">
+                    <div className="bg-[#4361EE] text-white p-2 px-3 rounded-l-xl font-bold text-lg tracking-tighter shadow-lg shadow-blue-500/30">ED</div>
+                    <span className="glass-panel border-l-0 p-2 pr-3 rounded-r-xl font-bold text-lg text-slate-800 tracking-tight">VOCATE</span>
+                </div>
+                <div className="glass-panel px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-[#4361EE]">
+                    {activeIndex + 1} / {totalSlides}
+                </div>
+            </nav>
+        );
+
+        const Slide = ({ children, className = "" }) => {
             const [isVisible, setIsVisible] = useState(false);
-            const ref = useRef(null);
+            const slideRef = useRef(null);
 
             useEffect(() => {
                 const observer = new IntersectionObserver(
                     ([entry]) => {
                         if (entry.isIntersecting) {
                             setIsVisible(true);
-                            observer.unobserve(entry.target);
                         }
                     },
-                    { threshold }
+                    { threshold: 0.25 }
                 );
-                if (ref.current) observer.observe(ref.current);
-                return () => {
-                    if (ref.current) observer.unobserve(ref.current);
-                };
-            }, [threshold]);
+                if (slideRef.current) observer.observe(slideRef.current);
+                return () => observer.disconnect();
+            }, []);
 
             return (
-                <div
-                    ref={ref}
-                    className={`${className} transition-all duration-1000 cubic-bezier(0.17, 0.55, 0.55, 1) transform ${
-                        isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-12 scale-95"
-                    }`}
+                <SlideContext.Provider value={isVisible}>
+                    <div ref={slideRef} className={`h-screen w-full snap-start flex items-center justify-center p-6 md:p-20 relative z-10 ${className}`}>
+                        <div className="w-full max-w-7xl h-full max-h-[90vh] flex flex-col justify-center">
+                            {children}
+                        </div>
+                    </div>
+                </SlideContext.Provider>
+            );
+        };
+
+        const AnimatedItem = ({ children, delay = 0, type = "up" }) => {
+            const isVisible = useContext(SlideContext);
+            const animationClass = type === "zoom" ? "reveal-zoom" : "reveal-up";
+            
+            return (
+                <div 
+                    className={`${animationClass} ${isVisible ? 'active' : ''}`} 
                     style={{ transitionDelay: `${delay}ms` }}
                 >
                     {children}
                 </div>
             );
-        };
+        }
 
-        const CountUp = ({ end, suffix = "", prefix = "", duration = 2000 }) => {
+        const CountUp = ({ end, suffix = "", prefix = "" }) => {
+            const isVisible = useContext(SlideContext);
             const [count, setCount] = useState(0);
-            const ref = useRef(null);
-            const [isVisible, setIsVisible] = useState(false);
-
-            useEffect(() => {
-                const observer = new IntersectionObserver(
-                    ([entry]) => {
-                        if (entry.isIntersecting) {
-                            setIsVisible(true);
-                            observer.disconnect();
-                        }
-                    },
-                    { threshold: 0.5 }
-                );
-                if (ref.current) observer.observe(ref.current);
-            }, []);
-
+            
             useEffect(() => {
                 if (!isVisible) return;
                 
                 let start = 0;
-                // Parse the end value if it's a string (remove non-digits for calculation)
+                const duration = 2000;
                 const endVal = parseInt(String(end).replace(/[^0-9]/g, ''));
-                if (start === endVal) return;
-
-                let incrementTime = (duration / endVal) * Math.abs(endVal - start);
-                // Cap speed for large numbers
-                if (incrementTime < 10) incrementTime = 10;
-
+                if (endVal === 0) return;
+                
+                const stepTime = Math.abs(Math.floor(duration / (endVal > 100 ? 60 : endVal)));
                 const timer = setInterval(() => {
-                    start += Math.ceil(endVal / (duration / 20)); // approximate steps
-                    if (start >= endVal) {
-                        start = endVal;
-                        clearInterval(timer);
-                    }
+                    const increment = endVal > 1000 ? Math.ceil(endVal / 50) : 1;
+                    start += increment;
+                    if (start >= endVal) { start = endVal; clearInterval(timer); }
                     setCount(start);
-                }, 20);
-
+                }, stepTime);
+                
                 return () => clearInterval(timer);
-            }, [end, duration, isVisible]);
+            }, [end, isVisible]);
 
-            return (
-                <span ref={ref} className="tabular-nums">
-                    {prefix}{count.toLocaleString()}{suffix}
-                </span>
-            );
+            return <span>{prefix}{count.toLocaleString()}{suffix}</span>;
         };
 
-        const EdvocatePitch = () => {
-            const [activeSection, setActiveSection] = useState('hero');
-            const [scrolled, setScrolled] = useState(false);
+        // --- Main App ---
 
-            // Handle scroll for navigation highlighting
-            useEffect(() => {
-                const handleScroll = () => {
-                    setScrolled(window.scrollY > 50);
-                };
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
+        const Presentation = () => {
+            const containerRef = useRef(null);
+            const [activeIndex, setActiveIndex] = useState(0);
 
-            const scrollToSection = (id) => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' });
-                    setActiveSection(id);
+            const handleScroll = () => {
+                if (containerRef.current) {
+                    const index = Math.round(containerRef.current.scrollTop / window.innerHeight);
+                    setActiveIndex(index);
                 }
             };
 
-            const NavItem = ({ id, label }) => (
-                <button 
-                    onClick={() => scrollToSection(id)}
-                    className={`px-4 py-2 text-sm font-medium transition-all duration-300 relative group ${
-                        activeSection === id ? 'text-[#4361EE]' : 'text-slate-600 hover:text-[#4361EE]'
-                    }`}
-                >
-                    {label}
-                    <span className={`absolute bottom-0 left-0 h-0.5 bg-[#4361EE] transition-all duration-300 ${activeSection === id ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-                </button>
-            );
+            useEffect(() => {
+                const ref = containerRef.current;
+                if (ref) {
+                    ref.addEventListener('scroll', handleScroll);
+                    return () => ref.removeEventListener('scroll', handleScroll);
+                }
+            }, []);
 
             return (
-                <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200 selection:text-blue-900 overflow-x-hidden">
-                    
-                    {/* Dynamic Background */}
-                    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-                        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#4361EE]/10 rounded-full blur-[100px] animate-pulse"></div>
-                        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-400/20 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }}></div>
-                    </div>
+                <div className="relative w-full h-screen">
+                    <LiquidBackground />
+                    <Navbar activeIndex={activeIndex} totalSlides={9} />
 
-                    {/* Navigation */}
-                    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 border-b ${scrolled ? 'bg-white/80 backdrop-blur-xl border-slate-200 py-3 shadow-sm' : 'bg-transparent border-transparent py-6'}`}>
-                        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-                            {/* Logo Update: No gap, #4361EE Hex */}
-                            <div className="flex items-center gap-0 group cursor-pointer" onClick={() => scrollToSection('hero')}>
-                                <div className="bg-[#4361EE] text-white p-2 px-3 rounded-l-xl rounded-r-none font-bold text-xl tracking-tighter shadow-lg group-hover:brightness-110 transition-all duration-300">ED</div>
-                                <span className="bg-white/50 backdrop-blur-sm border border-l-0 border-slate-200 p-2 pr-3 rounded-r-xl font-bold text-xl text-slate-800 tracking-tight group-hover:text-[#4361EE] transition-colors">VOCATE</span>
-                            </div>
-                            <div className="hidden md:flex gap-1">
-                                <NavItem id="problem" label="Problem" />
-                                <NavItem id="solution" label="Solution" />
-                                <NavItem id="product" label="Product" />
-                                <NavItem id="market" label="Market" />
-                                <NavItem id="roadmap" label="Roadmap" />
-                                <NavItem id="financials" label="Financials" />
-                            </div>
-                            <button onClick={() => window.location.href = 'mailto:hello@edvocate.in'} className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-slate-800 transition-all hover:scale-105 hover:shadow-xl hover:shadow-blue-900/20 flex items-center gap-2 active:scale-95">
-                                <Mail className="w-4 h-4" /> Invest
-                            </button>
-                        </div>
-                    </nav>
-
-                    {/* Hero Section */}
-                    <header id="hero" className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 -z-10"></div>
+                    <div 
+                        ref={containerRef}
+                        className="h-full w-full overflow-y-scroll snap-y snap-mandatory no-scrollbar scroll-smooth"
+                    >
                         
-                        <div className="max-w-7xl mx-auto px-6 text-center">
-                            <Reveal>
-                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 border border-blue-200 text-[#4361EE] text-xs font-bold uppercase tracking-wide mb-8 backdrop-blur-sm shadow-sm hover:scale-105 transition-transform cursor-default">
-                                    <Zap className="w-3 h-3 fill-current" /> Infrastructure Pitch 2026
-                                </div>
-                            </Reveal>
-                            
-                            <Reveal delay={100}>
-                                <h1 className="text-5xl md:text-8xl font-bold text-slate-900 tracking-tight mb-8 leading-[0.9]">
-                                    Building India’s <br/>
-                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4361EE] via-indigo-600 to-cyan-500 animate-gradient-x">Career Decision</span>
-                                    <br/>Infrastructure
-                                </h1>
-                            </Reveal>
+                        {/* Slide 1: Hero */}
+                        <Slide>
+                            <div className="text-center space-y-8 flex flex-col items-center">
+                                <AnimatedItem delay={0} type="zoom">
+                                    <div className="inline-block px-5 py-2 rounded-full border border-[#4361EE] bg-white/50 backdrop-blur-sm text-[#4361EE] text-sm font-bold uppercase tracking-wider mb-4 shadow-sm animate-float">
+                                        Infrastructure Pitch 2026
+                                    </div>
+                                </AnimatedItem>
+                                <AnimatedItem delay={200} type="up">
+                                    <h1 className="text-7xl md:text-9xl font-bold leading-none tracking-tight text-slate-900 drop-shadow-sm">
+                                        ED<span className="text-[#4361EE]">VOCATE</span>
+                                    </h1>
+                                </AnimatedItem>
+                                <AnimatedItem delay={400} type="up">
+                                    <p className="text-2xl md:text-4xl text-slate-600 font-light max-w-4xl mx-auto leading-relaxed">
+                                        Building India’s <span className="text-slate-900 font-bold border-b-4 border-[#4361EE]/30">Career Decision Infrastructure</span>.
+                                    </p>
+                                </AnimatedItem>
+                                <AnimatedItem delay={600} type="up">
+                                    <p className="text-lg text-slate-500 font-medium tracking-wide">Not an EdTech App. A National Utility.</p>
+                                </AnimatedItem>
+                                
+                                <AnimatedItem delay={800} type="up">
+                                    <div className="pt-12 text-[#4361EE] animate-bounce">
+                                        <ChevronDown className="w-8 h-8" />
+                                    </div>
+                                </AnimatedItem>
+                            </div>
+                        </Slide>
 
-                            <Reveal delay={200}>
-                                <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto mb-12 leading-relaxed">
-                                    We don't predict futures. We engineer the <span className="font-bold text-slate-900">decision layer</span> connecting 30M+ students to the right education, skills, and careers at a national scale.
-                                </p>
-                            </Reveal>
-
-                            <Reveal delay={300}>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                                    <button onClick={() => scrollToSection('problem')} className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#4361EE] text-white rounded-full font-bold hover:bg-blue-700 transition-all shadow-[0_10px_40px_-10px_rgba(67,97,238,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(67,97,238,0.6)] hover:-translate-y-1">
-                                        Explore The Vision 
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                    </button>
-                                    <button onClick={() => scrollToSection('financials')} className="px-8 py-4 text-slate-600 font-bold hover:text-[#4361EE] transition-colors">
-                                        View Financials
-                                    </button>
-                                </div>
-                            </Reveal>
-                            
-                            {/* Stats Banner */}
-                            <div className="mt-24 max-w-5xl mx-auto border-t border-slate-200/60 pt-10">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        {/* Slide 2: Problem (Visual Cards) */}
+                        <Slide>
+                            <div className="w-full">
+                                <AnimatedItem delay={0} type="up">
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-slate-900">The Structural Failure</h2>
+                                </AnimatedItem>
+                                <div className="grid md:grid-cols-3 gap-8 w-full">
                                     {[
-                                        { label: 'Annual Students', value: 30, suffix: 'M+' },
-                                        { label: 'School Students', value: 250, suffix: 'M+' },
-                                        { label: 'College Students', value: 40, suffix: 'M+' },
-                                        { label: 'Market Opportunity', value: 34000, prefix: '₹', suffix: 'Cr' }
-                                    ].map((stat, i) => (
-                                        <Reveal key={i} delay={400 + (i * 100)}>
-                                            <div className="text-center group cursor-default">
-                                                <div className="text-3xl md:text-4xl font-bold text-slate-900 group-hover:text-[#4361EE] transition-colors">
-                                                    <CountUp end={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
+                                        { icon: Brain, title: "Decision Chaos", highlight: "30M+ Blind Choices", desc: "No unified framework. Students choose careers based on rumors." },
+                                        { icon: AlertTriangle, title: "Fragmented Ecosystem", highlight: "Skills ≠ Demand", desc: "Training inputs are completely detached from industry needs." },
+                                        { icon: MapPin, title: "Unscalable Counseling", highlight: "Urban Only", desc: "Expensive human counseling fails to reach rural India." }
+                                    ].map((item, i) => (
+                                        <AnimatedItem key={i} delay={200 + (i * 200)} type="up">
+                                            <div className="glass-card p-8 rounded-3xl flex flex-col h-full group items-center text-center">
+                                                <div className="w-20 h-20 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-[#4361EE] mb-6 shadow-sm group-hover:scale-110 transition-transform animate-float">
+                                                    <item.icon size={40} />
                                                 </div>
-                                                <div className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-2">{stat.label}</div>
+                                                <h3 className="text-2xl font-bold mb-2 text-slate-900">{item.title}</h3>
+                                                <div className="text-red-500 font-bold text-sm uppercase tracking-widest mb-4 bg-red-50 px-3 py-1 rounded-full">{item.highlight}</div>
+                                                <p className="text-slate-600 leading-relaxed">{item.desc}</p>
                                             </div>
-                                        </Reveal>
+                                        </AnimatedItem>
                                     ))}
                                 </div>
                             </div>
-                        </div>
-                    </header>
+                        </Slide>
 
-                    {/* Problem Section */}
-                    <section id="problem" className="py-24 bg-white relative">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <Reveal>
-                                <div className="text-center mb-16">
-                                    <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6">The Structural Failure</h2>
-                                    <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                                        Students rely on social pressure and random advice, leading to a massive misalignment of talent and opportunity.
-                                    </p>
-                                </div>
-                            </Reveal>
-
-                            <div className="grid md:grid-cols-3 gap-8">
-                                {[
-                                    { icon: Brain, color: 'red', title: 'Decision Chaos', desc: 'Thousands of courses and roles with no unified comparison framework. Students lack the data to compare options objectively.' },
-                                    { icon: Layers, color: 'orange', title: 'Fragmented Ecosystem', desc: 'Skill training is scattered across portals and poorly mapped to actual career demand. No coordination exists.' },
-                                    { icon: MapPin, color: 'blue', title: 'Unscalable Counseling', desc: 'Traditional counseling is expensive, city-centric, and inconsistent. It cannot serve rural India effectively.' }
-                                ].map((item, i) => (
-                                    <Reveal key={i} delay={i * 150} className="h-full">
-                                        <div className={`h-full bg-slate-50 rounded-3xl p-8 border border-slate-100 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 hover:bg-white group relative overflow-hidden`}>
-                                            <div className={`absolute top-0 right-0 w-32 h-32 bg-${item.color}-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-${item.color}-500/10`}></div>
-                                            <div className={`w-14 h-14 bg-${item.color}-100 text-${item.color}-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-sm`}>
-                                                <item.icon className="w-7 h-7" />
-                                            </div>
-                                            <h3 className="text-xl font-bold mb-4 text-slate-900">{item.title}</h3>
-                                            <p className="text-slate-600 leading-relaxed text-sm">
-                                                {item.desc}
-                                            </p>
-                                        </div>
-                                    </Reveal>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Solution / Engine Visualization */}
-                    <section id="solution" className="py-32 bg-[#0F172A] text-white overflow-hidden relative">
-                        {/* Animated Background Elements */}
-                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[600px] bg-[#4361EE]/20 rounded-full blur-[128px] animate-pulse"></div>
-                        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[128px] animate-pulse" style={{ animationDelay: '3s' }}></div>
-
-                        <div className="max-w-7xl mx-auto px-6 relative z-10">
-                            <Reveal>
-                                <div className="text-center mb-20">
-                                    <span className="inline-block py-1 px-3 rounded-full bg-[#4361EE]/10 text-[#4361EE] font-bold tracking-widest uppercase text-xs border border-[#4361EE]/20 mb-4">The Solution</span>
-                                    <h2 className="text-4xl md:text-6xl font-bold">The EDVOCATE Engine</h2>
-                                    <p className="text-slate-400 mt-6 max-w-2xl mx-auto text-lg">
-                                        We convert unstructured student data into structured career, education, and skill pathways.
-                                    </p>
-                                </div>
-                            </Reveal>
-
-                            {/* Engine Workflow Diagram */}
-                            <div className="grid lg:grid-cols-3 gap-6 items-stretch">
-                                {/* Input Layer */}
-                                <Reveal delay={100} className="h-full">
-                                    <div className="h-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative hover:bg-white/10 transition-colors">
-                                        <div className="absolute -top-4 left-8 bg-[#4361EE] text-xs font-bold px-4 py-1.5 rounded-full shadow-lg shadow-blue-900/50">STEP 1</div>
-                                        <div className="flex items-center gap-4 mb-8">
-                                            <div className="p-3 bg-[#4361EE]/20 rounded-xl">
-                                                <Users className="w-6 h-6 text-blue-400" />
-                                            </div>
-                                            <h3 className="text-2xl font-bold">Input Layer</h3>
-                                        </div>
-                                        <ul className="space-y-4 text-slate-300">
-                                            {['Academic Level', 'Subject Interests', 'Strength Traits', 'Geo-Location'].map((item, i) => (
-                                                <li key={i} className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/5 hover:border-[#4361EE]/30 transition-colors">
-                                                    <div className="w-2 h-2 rounded-full bg-[#4361EE] shadow-[0_0_10px_rgba(67,97,238,0.8)]"></div> {item}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </Reveal>
-
-                                {/* Processing Layer (Center) */}
-                                <Reveal delay={300} className="h-full">
-                                    <div className="h-full bg-gradient-to-b from-[#4361EE]/40 to-slate-900/40 border border-[#4361EE]/30 rounded-3xl p-8 flex flex-col justify-center relative shadow-[0_0_50px_rgba(67,97,238,0.15)] overflow-hidden group">
-                                        <div className="absolute inset-0 bg-[#4361EE]/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-cyan-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.6)]">CORE ENGINE</div>
-                                        <div className="flex justify-center mb-8 relative">
-                                            <div className="absolute inset-0 bg-cyan-500/30 blur-2xl rounded-full scale-50 animate-pulse"></div>
-                                            <Cpu className="w-16 h-16 text-cyan-400 relative z-10 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]" />
-                                        </div>
-                                        <h3 className="text-2xl font-bold text-center mb-8">Logic Processing</h3>
-                                        <div className="space-y-4">
-                                            {[
-                                                { l: 'Role Compatibility', r: '98%' },
-                                                { l: 'Eligibility Checks', r: 'Active' },
-                                                { l: 'Market Demand', r: 'Real-time' },
-                                                { l: 'College Mapping', r: '< 60km' }
-                                            ].map((row, i) => (
-                                                <div key={i} className="flex justify-between text-sm text-cyan-200 border-b border-cyan-500/20 pb-3 px-2">
-                                                    <span>{row.l}</span>
-                                                    <span className="font-mono">{row.r}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </Reveal>
-
-                                {/* Output Layer */}
-                                <Reveal delay={500} className="h-full">
-                                    <div className="h-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative hover:bg-white/10 transition-colors">
-                                        <div className="absolute -top-4 right-8 bg-emerald-500 text-black text-xs font-bold px-4 py-1.5 rounded-full shadow-lg shadow-emerald-900/50">STEP 3</div>
-                                        <div className="flex items-center gap-4 mb-8">
-                                            <div className="p-3 bg-emerald-500/20 rounded-xl">
-                                                <Target className="w-6 h-6 text-emerald-400" />
-                                            </div>
-                                            <h3 className="text-2xl font-bold">Output Layer</h3>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {[
-                                                { t: 'Career Blueprint', d: 'Full roadmap & Role shortlists' },
-                                                { t: 'Institution Match', d: 'Colleges within 60km + State' },
-                                                { t: 'Skill Gap Analysis', d: 'Readiness & Learning Resources' }
-                                            ].map((card, i) => (
-                                                <div key={i} className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-xl hover:bg-emerald-500/20 transition-colors">
-                                                    <h4 className="font-bold text-emerald-400 text-sm mb-1 flex items-center gap-2">
-                                                        <CheckCircle className="w-3 h-3" /> {card.t}
-                                                    </h4>
-                                                    <p className="text-xs text-slate-400 pl-5">{card.d}</p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </Reveal>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Product & Strategy */}
-                    <section id="product" className="py-24 bg-slate-50 relative overflow-hidden">
-                        <div className="max-w-7xl mx-auto px-6 relative z-10">
-                            <div className="flex flex-col md:flex-row gap-16 items-start">
+                        {/* Slide 3: Solution (Data Pipeline Visual) */}
+                        <Slide>
+                            <div className="w-full flex flex-col items-center">
+                                <AnimatedItem delay={0}>
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-slate-900">The Decision Engine</h2>
+                                </AnimatedItem>
                                 
-                                {/* Left: Product Stack */}
-                                <div className="md:w-1/2">
-                                    <Reveal>
-                                        <h2 className="text-3xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                                            Product Ecosystem <div className="h-1 flex-grow bg-slate-200 rounded-full ml-4"></div>
-                                        </h2>
-                                    </Reveal>
-                                    
-                                    <div className="space-y-6">
-                                        {[
-                                            { icon: Briefcase, color: 'blue', title: 'Career Decision Report', price: '₹299 – ₹499 per student', desc: 'Full roadmap, college matching, skill mapping, and sector outlook. Automated & Scalable.' },
-                                            { icon: School, color: 'purple', title: 'Institutional Dashboard', price: 'B2B Contracts', desc: 'Schools generate bulk reports, batch analytics, and career outcome tracking.' },
-                                            { icon: TrendingUp, color: 'emerald', title: 'Skill Enablement Layer', price: 'Commission Model', desc: 'Curated marketplace for 3rd party training providers based on skill gaps.' }
-                                        ].map((item, i) => (
-                                            <Reveal key={i} delay={i * 100}>
-                                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                                    <div className={`bg-${item.color}-50 p-4 rounded-xl h-fit`}>
-                                                        <item.icon className={`w-6 h-6 text-${item.color}-600`} />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-xl font-bold text-slate-900">{item.title}</h3>
-                                                        <div className={`text-sm font-bold text-${item.color}-600 mt-1 mb-2 bg-${item.color}-50 inline-block px-2 py-0.5 rounded`}>{item.price}</div>
-                                                        <p className="text-slate-600 text-sm leading-relaxed">{item.desc}</p>
-                                                    </div>
-                                                </div>
-                                            </Reveal>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Right: Offline Strategy */}
-                                <div className="md:w-1/2">
-                                    <Reveal delay={200}>
-                                        <div className="bg-slate-900 text-white rounded-[2rem] p-10 relative overflow-hidden shadow-2xl">
-                                            <div className="absolute top-0 right-0 w-64 h-64 bg-[#4361EE] rounded-full blur-[80px] -mr-16 -mt-16 opacity-50"></div>
-                                            
-                                            <h3 className="text-2xl font-bold mb-6 relative z-10 flex items-center gap-3">
-                                                <Globe className="text-blue-400" /> Hybrid Expansion
-                                            </h3>
-                                            <p className="text-slate-300 mb-10 relative z-10 leading-relaxed">
-                                                We do NOT build permanent centers initially. We use a <span className="text-white font-bold">demand-triggered, asset-light model</span>.
-                                            </p>
-
-                                            <div className="space-y-2 relative z-10">
-                                                {[
-                                                    { icon: Activity, title: '1. Digital Demand', desc: 'User density & skill gap clusters identified via app' },
-                                                    { icon: School, title: '2. Co-Space Activation', desc: 'Temp classrooms in partner colleges/community halls' },
-                                                    { icon: MapPin, title: '3. Permanent Hub', desc: 'High-demand locations evolve into fixed centers' }
-                                                ].map((step, i) => (
-                                                    <React.Fragment key={i}>
-                                                        <div className="flex items-center gap-5 bg-white/10 p-5 rounded-xl border border-white/5 backdrop-blur-sm">
-                                                            <step.icon className={`w-8 h-8 ${i===0 ? 'text-blue-400' : i===1 ? 'text-indigo-400' : 'text-emerald-400'}`} />
-                                                            <div>
-                                                                <div className="font-bold text-lg">{step.title}</div>
-                                                                <div className="text-xs text-slate-400 mt-1">{step.desc}</div>
-                                                            </div>
-                                                        </div>
-                                                        {i < 2 && (
-                                                            <div className="flex justify-center py-2">
-                                                                <ChevronDown className="text-slate-600 animate-bounce" />
-                                                            </div>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </div>
+                                <div className="w-full flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                                    {/* Input */}
+                                    <AnimatedItem delay={200} type="zoom">
+                                        <div className="glass-panel p-6 rounded-2xl w-64 h-64 flex flex-col items-center justify-center border-l-4 border-slate-300 relative">
+                                            <div className="absolute top-4 left-4 text-xs font-bold text-slate-400 uppercase">Input</div>
+                                            <Users size={48} className="text-slate-400 mb-4" />
+                                            <div className="font-bold text-xl text-slate-700">Student Data</div>
+                                            <div className="text-sm text-slate-500 mt-2 text-center">Grades, Interest, Location</div>
                                         </div>
-                                    </Reveal>
+                                    </AnimatedItem>
+
+                                    {/* Pipe Animation */}
+                                    <div className="hidden md:flex flex-col items-center gap-1">
+                                         <div className="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
+                                            <div className="h-full w-full bg-[#4361EE] animate-pulse"></div>
+                                         </div>
+                                         <ArrowRight size={20} className="text-[#4361EE]" />
+                                    </div>
+
+                                    {/* Engine */}
+                                    <AnimatedItem delay={400} type="zoom">
+                                        <div className="glass-card p-6 rounded-[2rem] w-72 h-72 flex flex-col items-center justify-center border-2 border-[#4361EE] bg-white shadow-[0_0_40px_rgba(67,97,238,0.2)] relative z-10">
+                                            <div className="absolute top-0 -translate-y-1/2 bg-[#4361EE] text-white px-4 py-1 rounded-full text-xs font-bold uppercase shadow-lg">Logic Core</div>
+                                            <Cpu size={64} className="text-[#4361EE] mb-4 animate-pulse-slow" />
+                                            <div className="font-bold text-2xl text-slate-900">Processing</div>
+                                            <div className="text-sm text-[#4361EE] mt-2 text-center font-bold">Market Demand<br/>+ Role Fit</div>
+                                        </div>
+                                    </AnimatedItem>
+
+                                    {/* Pipe Animation */}
+                                    <div className="hidden md:flex flex-col items-center gap-1">
+                                         <div className="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
+                                            <div className="h-full w-full bg-emerald-400 animate-pulse"></div>
+                                         </div>
+                                         <ArrowRight size={20} className="text-emerald-500" />
+                                    </div>
+
+                                    {/* Output */}
+                                    <AnimatedItem delay={600} type="zoom">
+                                        <div className="glass-panel p-6 rounded-2xl w-64 h-64 flex flex-col items-center justify-center border-r-4 border-emerald-400 relative">
+                                            <div className="absolute top-4 right-4 text-xs font-bold text-emerald-600 uppercase">Output</div>
+                                            <Target size={48} className="text-emerald-500 mb-4" />
+                                            <div className="font-bold text-xl text-slate-700">Blueprint</div>
+                                            <div className="text-sm text-slate-500 mt-2 text-center">Career Roadmap & College List</div>
+                                        </div>
+                                    </AnimatedItem>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                        </Slide>
 
-                    {/* Market & Competitive Advantage */}
-                    <section id="market" className="py-24 bg-white border-t border-slate-100">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <Reveal>
-                                <div className="mb-20 text-center">
-                                    <span className="text-[#4361EE] font-bold uppercase text-xs tracking-widest mb-2 block">Competitive Landscape</span>
-                                    <h2 className="text-4xl font-bold text-slate-900">Why EDVOCATE Wins</h2>
-                                </div>
-                            </Reveal>
-
-                            <div className="grid md:grid-cols-2 gap-16">
-                                {/* Advantage */}
-                                <div>
-                                    <Reveal>
-                                        <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                                            <ShieldCheck className="w-8 h-8 text-[#4361EE]" /> Strategic Moat
-                                        </h3>
-                                    </Reveal>
-                                    <ul className="space-y-8">
-                                        {[
-                                            { t: 'Infrastructure, Not Content', d: 'Competitors sell courses/content. We sell decision logic and ecosystem orchestration.' },
-                                            { t: 'Location Intelligence', d: 'We map colleges and training to geography (60km radius logic).' },
-                                            { t: 'Data Flywheel', d: 'More users → better decisions → higher trust → more institutions.' },
-                                            { t: 'Trust & Compliance', d: 'No admission guarantees. Transparent disclaimers. Built for regulation.' }
-                                        ].map((item, i) => (
-                                            <Reveal key={i} delay={i * 100}>
-                                                <li className="flex gap-5">
-                                                    <div className="mt-1">
-                                                        <CheckCircle className="w-6 h-6 text-emerald-500 shrink-0 shadow-sm rounded-full" />
-                                                    </div>
-                                                    <div>
-                                                        <strong className="block text-lg text-slate-900 mb-1">{item.t}</strong>
-                                                        <span className="text-slate-600 text-sm leading-relaxed">{item.d}</span>
-                                                    </div>
-                                                </li>
-                                            </Reveal>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {/* Revenue Model */}
-                                <Reveal delay={200}>
-                                    <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 shadow-xl relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#4361EE]/10 rounded-full -mr-10 -mt-10"></div>
-                                        <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-                                            <BarChart3 className="w-8 h-8 text-[#4361EE]" /> Revenue Architecture
-                                        </h3>
-                                        
-                                        <div className="space-y-5">
-                                            {[
-                                                { n: '1', t: 'Direct B2C', s: 'Reports (₹299+) & Premium Guidance', c: 'blue' },
-                                                { n: '2', t: 'Institutional', s: 'Bulk Analytics & Dashboards', c: 'purple' },
-                                                { n: '3', t: 'Marketplace', s: 'Skill Partner Commissions', c: 'emerald' },
-                                                { n: '4', t: 'Future (SaaS)', s: 'Workforce Skilling Programs', c: 'slate' }
-                                            ].map((rev, i) => (
-                                                <div key={i} className={`flex items-center justify-between p-5 bg-white rounded-2xl shadow-sm border border-slate-100 hover:scale-[1.02] transition-transform duration-300 ${rev.c === 'slate' ? 'opacity-60 grayscale' : ''}`}>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className={`bg-${rev.c}-100 w-10 h-10 flex items-center justify-center rounded-xl text-${rev.c}-600 font-bold shadow-inner`}>{rev.n}</div>
-                                                        <span className="font-bold text-lg text-slate-800">{rev.t}</span>
-                                                    </div>
-                                                    <span className="text-slate-500 text-xs font-medium bg-slate-50 px-3 py-1 rounded-full border border-slate-100">{rev.s}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </Reveal>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Roadmap */}
-                    <section id="roadmap" className="py-24 bg-slate-900 text-white relative">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <Reveal>
-                                <h2 className="text-3xl md:text-5xl font-bold text-center mb-20">Execution Roadmap</h2>
-                            </Reveal>
-                            
-                            <div className="relative">
-                                {/* Animated Line */}
-                                <div className="absolute top-8 left-0 w-full h-1 bg-gradient-to-r from-[#4361EE] via-purple-600 to-slate-800 hidden md:block rounded-full opacity-50"></div>
-                                
-                                <div className="grid md:grid-cols-3 gap-10">
+                        {/* Slide 4: Products (App Interface Visuals) */}
+                        <Slide>
+                            <div className="w-full">
+                                <AnimatedItem delay={0} type="up">
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-slate-900">Product Ecosystem</h2>
+                                </AnimatedItem>
+                                <div className="grid md:grid-cols-3 gap-6 w-full">
                                     {[
-                                        { p: 'PHASE 1 (0-12 Mo)', t: 'Foundation', items: ['Pan-India PWA Launch', 'Report Monetization', 'Institutional Onboarding', 'Brand Trust Building'], c: 'blue' },
-                                        { p: 'PHASE 2 (12-24 Mo)', t: 'Expansion', items: ['Premium Guidance Layer', 'Skill Marketplace Integration', 'Advanced Analytics Dashboard'], c: 'purple' },
-                                        { p: 'PHASE 3 (24+ Mo)', t: 'Ecosystem', items: ['Offline Training Hubs', 'Enterprise Partnerships', 'Workforce Skilling Programs'], c: 'slate' }
-                                    ].map((phase, i) => (
-                                        <Reveal key={i} delay={i * 200}>
-                                            <div className="relative pt-16 group">
-                                                <div className={`absolute top-6 left-0 md:left-1/2 md:-translate-x-1/2 w-6 h-6 bg-${phase.c}-500 rounded-full border-4 border-slate-900 z-10 shadow-[0_0_20px_rgba(59,130,246,0.5)] group-hover:scale-125 transition-transform`}></div>
-                                                <div className={`bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-sm group-hover:bg-white/10 transition-colors ${i===2 ? 'opacity-60' : ''}`}>
-                                                    <div className={`text-${phase.c}-400 font-bold mb-3 text-xs tracking-wider`}>{phase.p}</div>
-                                                    <h3 className="text-2xl font-bold mb-6">{phase.t}</h3>
-                                                    <ul className="space-y-3 text-sm text-slate-400">
-                                                        {phase.items.map((item, idx) => (
-                                                            <li key={idx} className="flex items-start gap-2">
-                                                                <span className="mt-1.5 w-1.5 h-1.5 bg-slate-500 rounded-full"></span> {item}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                        { 
+                                            title: "Decision Report", 
+                                            price: "₹299", 
+                                            icon: Briefcase, 
+                                            color: "blue", 
+                                            visual: (
+                                                <div className="w-full h-24 bg-blue-50 rounded-lg mt-4 flex items-center justify-center p-2 gap-2">
+                                                    <div className="h-16 w-12 bg-white rounded shadow-sm"></div>
+                                                    <div className="flex-1 space-y-2">
+                                                        <div className="h-2 w-3/4 bg-blue-200 rounded"></div>
+                                                        <div className="h-2 w-1/2 bg-blue-100 rounded"></div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Reveal>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Financials Section */}
-                    <section id="financials" className="py-32 bg-white relative">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <Reveal>
-                                <div className="text-center mb-20">
-                                    <span className="text-green-600 font-bold tracking-widest uppercase text-xs mb-3 block">Growth & Scale</span>
-                                    <h2 className="text-4xl md:text-6xl font-bold text-slate-900">Financial Framework</h2>
-                                    <p className="text-slate-500 mt-6 max-w-2xl mx-auto text-lg">
-                                        Market size validation, revenue capture strategy, and valuation pathway.
-                                    </p>
-                                </div>
-                            </Reveal>
-
-                            {/* TAM - SAM - SOM */}
-                            <div className="grid md:grid-cols-3 gap-8 mb-24">
-                                {[
-                                    { t: 'TAM', sub: 'Total Addressable', v: 34385, color: 'slate', desc: 'Annual Revenue Potential' },
-                                    { t: 'SAM', sub: 'Serviceable Available', v: 9177, color: 'blue', desc: 'Digital Serviceable Market' },
-                                    { t: 'SOM', sub: 'Obtainable (36 Mo)', v: 14, color: 'green', desc: 'Target ARR (Year 2-3)' }
-                                ].map((box, i) => (
-                                    <Reveal key={i} delay={i * 150} className="h-full">
-                                        <div className={`h-full bg-${box.color}-50 rounded-3xl p-8 border border-${box.color}-100 flex flex-col justify-between hover:scale-105 transition-transform duration-500 shadow-sm hover:shadow-xl`}>
-                                            <div>
-                                                <div className="flex justify-between items-start mb-6">
-                                                    <h3 className={`text-3xl font-black text-${box.color}-300`}>{box.t}</h3>
-                                                    <div className={`bg-${box.color}-200/50 text-${box.color}-800 text-[10px] font-bold px-2 py-1 rounded uppercase`}>{box.sub}</div>
+                                            )
+                                        },
+                                        { 
+                                            title: "Institutional SaaS", 
+                                            price: "B2B", 
+                                            icon: School, 
+                                            color: "purple", 
+                                            visual: (
+                                                <div className="w-full h-24 bg-purple-50 rounded-lg mt-4 flex items-end justify-center p-4 gap-2">
+                                                    <div className="w-4 h-8 bg-purple-200 rounded-t"></div>
+                                                    <div className="w-4 h-12 bg-purple-300 rounded-t"></div>
+                                                    <div className="w-4 h-16 bg-purple-400 rounded-t"></div>
+                                                    <div className="w-4 h-10 bg-purple-200 rounded-t"></div>
                                                 </div>
-                                                <div className={`text-4xl lg:text-5xl font-bold text-${box.color}-900 mb-2 tracking-tight`}>
-                                                    <CountUp end={box.v} prefix="₹" suffix=" Cr" />
+                                            )
+                                        },
+                                        { 
+                                            title: "Skill Marketplace", 
+                                            price: "Commission", 
+                                            icon: TrendingUp, 
+                                            color: "emerald", 
+                                            visual: (
+                                                <div className="w-full h-24 bg-emerald-50 rounded-lg mt-4 flex items-center justify-around p-2">
+                                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-emerald-500 font-bold text-xs">JS</div>
+                                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-blue-500 font-bold text-xs">PY</div>
+                                                    <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-orange-500 font-bold text-xs">AI</div>
                                                 </div>
-                                                <div className={`text-sm text-${box.color}-600 font-medium`}>{box.desc}</div>
-                                            </div>
-                                            <div className={`w-full h-1 bg-${box.color}-200 mt-8 rounded-full overflow-hidden`}>
-                                                <div className={`h-full bg-${box.color}-500 w-1/2`}></div>
-                                            </div>
-                                        </div>
-                                    </Reveal>
-                                ))}
-                            </div>
-
-                            {/* Valuation Chart */}
-                            <Reveal delay={300}>
-                                <div className="bg-[#0B1121] rounded-[3rem] p-10 md:p-16 text-white overflow-hidden relative shadow-2xl">
-                                    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4361EE]/10 rounded-full blur-[120px] -mr-32 -mt-32 animate-pulse"></div>
-                                    
-                                    <h3 className="text-3xl font-bold mb-16 flex items-center gap-4 relative z-10">
-                                        <TrendingUp className="text-green-400 w-8 h-8" /> Valuation Mapping
-                                    </h3>
-
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 items-end relative z-10 h-80 border-b border-slate-800 pb-8 mb-8">
-                                        {[
-                                            { l: 'PRE-SEED', v: 16, h: 'h-16', c: 'bg-slate-700' },
-                                            { l: 'YEAR 1', v: 21, h: 'h-24', c: 'bg-blue-800' },
-                                            { l: 'YEAR 2', v: 109, h: 'h-48', c: 'bg-blue-600' },
-                                            { l: 'YEAR 3', v: 270, h: 'h-full', c: 'bg-gradient-to-t from-green-600 to-green-400' }
-                                        ].map((bar, i) => (
-                                            <div key={i} className="w-full flex flex-col items-center gap-4 group h-full justify-end">
-                                                <div className="text-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-                                                    <div className="text-3xl font-bold mb-1">₹{bar.v}Cr</div>
-                                                </div>
-                                                <div className={`w-full ${bar.c} ${bar.h} rounded-t-2xl relative group-hover:brightness-110 transition-all shadow-lg`}></div>
-                                                <div className="text-xs font-bold text-slate-400 tracking-widest">{bar.l}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    {/* Exit Scenarios Grid */}
-                                    <div className="grid md:grid-cols-3 gap-8 mt-12 pt-4 relative z-10">
-                                        {[
-                                            { t: 'EdTech Buyout', v: '₹60-120 Cr', d: 'Acquisition by UpGrad, PhysicsWallah, etc.' },
-                                            { t: 'Workforce Platform', v: '₹100-180 Cr', d: 'Acquisition by Indeed, TeamLease, Apna.' },
-                                            { t: 'Strategic Integration', v: '₹200-300 Cr', d: 'Government / National Career Infra Partner.', special: true }
-                                        ].map((exit, i) => (
-                                            <div key={i} className={`p-6 rounded-2xl ${exit.special ? 'bg-green-900/20 border border-green-500/30' : 'bg-white/5 border border-white/5'}`}>
-                                                <h4 className={`font-bold text-sm mb-3 uppercase tracking-wider ${exit.special ? 'text-green-400' : 'text-blue-300'}`}>{exit.t}</h4>
-                                                <div className="text-3xl font-bold mb-2">{exit.v}</div>
-                                                <p className="text-xs text-slate-400 leading-relaxed opacity-70">{exit.d}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </Reveal>
-                        </div>
-                    </section>
-
-                    {/* Fundraising & Vision */}
-                    <section id="ask" className="py-32 bg-gradient-to-br from-blue-700 to-indigo-800 text-white relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                        <div className="max-w-7xl mx-auto px-6 relative z-10">
-                            <div className="grid md:grid-cols-2 gap-20 items-center">
-                                <div>
-                                    <Reveal>
-                                        <h2 className="text-5xl font-bold mb-10">Investment Opportunity</h2>
-                                    </Reveal>
-                                    <Reveal delay={100}>
-                                        <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-10 border border-white/20 shadow-2xl">
-                                            <div className="flex justify-between items-end mb-8">
+                                            )
+                                        }
+                                    ].map((item, i) => (
+                                        <AnimatedItem key={i} delay={200 + (i * 200)} type="up">
+                                            <div className="glass-card p-6 rounded-3xl relative overflow-hidden group hover:bg-white transition-colors h-full flex flex-col justify-between">
                                                 <div>
-                                                    <div className="text-xs font-bold text-blue-200 uppercase tracking-widest mb-2">Target Raise (Pre-Seed)</div>
-                                                    <div className="text-5xl font-bold">₹1.5 - 2.5 Cr</div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-xs font-bold text-blue-200 uppercase tracking-widest mb-2">Equity Dilution</div>
-                                                    <div className="text-3xl font-bold">10% – 15%</div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="w-full h-px bg-white/20 my-8"></div>
-                                            
-                                            <h4 className="font-bold mb-6 text-blue-100 uppercase text-sm tracking-wider">Use of Funds</h4>
-                                            <div className="grid grid-cols-2 gap-y-4 gap-x-8 text-sm font-medium">
-                                                {['Platform Development', 'Backend Scaling', 'Marketing & Partnerships', 'Operations & Compliance'].map((use, i) => (
-                                                    <div key={i} className="flex items-center gap-3">
-                                                        <div className="w-2 h-2 bg-blue-300 rounded-full shadow-[0_0_10px_rgba(147,197,253,0.8)]"></div> {use}
+                                                    <div className={`w-12 h-12 rounded-xl bg-${item.color}-100 flex items-center justify-center text-${item.color}-600 mb-4`}>
+                                                        <item.icon size={24} />
                                                     </div>
-                                                ))}
+                                                    <h3 className="text-2xl font-bold mb-1 text-slate-900">{item.title}</h3>
+                                                    <div className={`text-${item.color}-600 font-bold text-sm mb-4 bg-${item.color}-50 w-fit px-2 rounded`}>{item.price}</div>
+                                                </div>
+                                                {item.visual}
                                             </div>
+                                        </AnimatedItem>
+                                    ))}
+                                </div>
+                            </div>
+                        </Slide>
+
+                        {/* Slide 5: Expansion (Map Visual) */}
+                        <Slide>
+                            <div className="grid md:grid-cols-2 gap-12 w-full items-center">
+                                <div>
+                                    <AnimatedItem delay={0} type="up">
+                                        <div className="inline-flex items-center gap-2 mb-6 text-[#4361EE] font-bold uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                                            <Globe size={16} /> Hybrid Strategy
                                         </div>
-                                    </Reveal>
+                                    </AnimatedItem>
+                                    <AnimatedItem delay={200} type="up">
+                                        <h2 className="text-5xl font-bold mb-8 text-slate-900">Asset-Light Expansion</h2>
+                                    </AnimatedItem>
+                                    <AnimatedItem delay={400} type="up">
+                                        <p className="text-xl text-slate-600 mb-8 leading-relaxed">
+                                            Zero CAPEX. We use <span className="font-bold text-[#4361EE]">Digital Signals</span> to trigger temporary physical presence.
+                                        </p>
+                                    </AnimatedItem>
+                                </div>
+                                <div className="space-y-4 relative">
+                                    <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-200"></div>
+                                    {[
+                                        { title: "Digital Signal", desc: "Identify user clusters via App.", icon: Activity },
+                                        { title: "Co-Space Activation", desc: "Weekend workshops in rented halls.", icon: School },
+                                        { title: "Permanent Hub", desc: "High-density zones evolve to centers.", icon: MapPin }
+                                    ].map((step, i) => (
+                                        <AnimatedItem key={i} delay={i * 300} type="up">
+                                            <div className="glass-panel p-6 rounded-2xl flex items-center gap-6 bg-white/70 relative z-10">
+                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg ${i===2 ? 'bg-emerald-500' : 'bg-[#4361EE]'}`}>
+                                                    <step.icon size={20} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-xl font-bold text-slate-900">{step.title}</h4>
+                                                    <p className="text-slate-500 text-sm">{step.desc}</p>
+                                                </div>
+                                            </div>
+                                        </AnimatedItem>
+                                    ))}
+                                </div>
+                            </div>
+                        </Slide>
+
+                        {/* Slide 6: Market (Animated Bar Chart) */}
+                        <Slide>
+                            <div className="text-center w-full h-full flex flex-col justify-center">
+                                <AnimatedItem delay={0} type="up">
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-12 text-slate-900">Market Opportunity</h2>
+                                </AnimatedItem>
+                                <div className="flex items-end justify-center gap-8 md:gap-16 h-80 w-full max-w-4xl mx-auto px-4">
                                     
-                                    <Reveal delay={200}>
-                                        <div className="mt-10 flex items-center gap-4 text-blue-100 bg-blue-900/40 p-5 rounded-2xl backdrop-blur-sm border border-blue-400/30">
-                                            <div className="bg-blue-500 p-2 rounded-full">
-                                                <Mail className="w-5 h-5 text-white" /> 
+                                    {/* SOM Bar */}
+                                    <div className="flex flex-col items-center justify-end h-full w-1/3 group">
+                                        <AnimatedItem delay={200} type="up">
+                                            <div className="mb-4 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="text-emerald-600 font-bold text-2xl">₹14 Cr</div>
+                                                <div className="text-xs text-slate-400">Target Revenue</div>
                                             </div>
-                                            <span className="text-base">Contact for Deck & Term Sheet: <strong className="text-white block md:inline">hello@edvocate.in</strong></span>
+                                            <div className={`w-full bg-emerald-400 rounded-t-2xl relative shadow-[0_0_20px_rgba(52,211,153,0.4)] transition-all duration-1000 bar-grow active`} style={{ height: '20px', minHeight: '5%' }}>
+                                                <div className="absolute bottom-4 left-0 w-full text-center text-white font-bold">SOM</div>
+                                            </div>
+                                        </AnimatedItem>
+                                    </div>
+
+                                    {/* SAM Bar */}
+                                    <div className="flex flex-col items-center justify-end h-full w-1/3 group">
+                                        <AnimatedItem delay={400} type="up">
+                                            <div className="mb-4 text-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="text-[#4361EE] font-bold text-3xl">₹9,177 Cr</div>
+                                                <div className="text-xs text-slate-400">Digital Reachable</div>
+                                            </div>
+                                            <div className={`w-full bg-[#4361EE] rounded-t-2xl relative shadow-[0_0_30px_rgba(67,97,238,0.4)] transition-all duration-1000 bar-grow active`} style={{ height: '120px', minHeight: '40%' }}>
+                                                <div className="absolute bottom-4 left-0 w-full text-center text-white font-bold">SAM</div>
+                                            </div>
+                                        </AnimatedItem>
+                                    </div>
+
+                                    {/* TAM Bar */}
+                                    <div className="flex flex-col items-center justify-end h-full w-1/3 group">
+                                        <AnimatedItem delay={600} type="up">
+                                            <div className="mb-4 text-center">
+                                                <div className="text-slate-800 font-bold text-4xl">₹34,385 Cr</div>
+                                                <div className="text-xs text-slate-500">Total Market</div>
+                                            </div>
+                                            <div className={`w-full bg-slate-800 rounded-t-2xl relative shadow-xl transition-all duration-1000 bar-grow active`} style={{ height: '240px', minHeight: '80%' }}>
+                                                <div className="absolute bottom-4 left-0 w-full text-center text-white font-bold">TAM</div>
+                                            </div>
+                                        </AnimatedItem>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </Slide>
+
+                        {/* Slide 7: Advantage (Visual Cards) */}
+                        <Slide>
+                            <AnimatedItem delay={0} type="up">
+                                <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-slate-900">Why EDVOCATE Wins</h2>
+                            </AnimatedItem>
+                            <div className="grid md:grid-cols-2 gap-12 w-full max-w-6xl">
+                                <AnimatedItem delay={200} type="zoom">
+                                    <div className="glass-panel p-10 rounded-3xl bg-white/40 border-l-8 border-[#4361EE] flex flex-col justify-center h-full">
+                                        <Layers size={48} className="text-[#4361EE] mb-6" />
+                                        <h3 className="text-3xl font-bold mb-4 text-slate-900">Infrastructure <br/><span className="text-slate-400">vs</span> Content</h3>
+                                        <p className="text-xl text-slate-600 leading-relaxed">
+                                            Competitors sell courses (Content). We sell the <span className="text-[#4361EE] font-bold">decision logic</span> (Infrastructure).
+                                        </p>
+                                    </div>
+                                </AnimatedItem>
+                                <div className="space-y-6">
+                                    {[
+                                        { t: "Location Intelligence", d: "60km radius mapping logic.", i: MapPin },
+                                        { t: "Data Flywheel", d: "More users = Better logic.", i: BarChart3 },
+                                        { t: "Regulatory Fit", d: "No false promises. 100% Compliant.", i: ShieldCheck }
+                                    ].map((item, idx) => (
+                                        <AnimatedItem key={idx} delay={400 + (idx * 200)} type="up">
+                                            <div className="glass-card p-6 rounded-2xl flex gap-4 bg-white/60 items-center">
+                                                <item.i className="text-[#4361EE] shrink-0" size={28} />
+                                                <div>
+                                                    <h4 className="text-xl font-bold text-slate-900">{item.t}</h4>
+                                                    <p className="text-slate-500 text-sm">{item.d}</p>
+                                                </div>
+                                            </div>
+                                        </AnimatedItem>
+                                    ))}
+                                </div>
+                            </div>
+                        </Slide>
+
+                        {/* Slide 8: Roadmap (Horizontal Timeline) */}
+                        <Slide>
+                            <div className="w-full">
+                                <AnimatedItem delay={0} type="up">
+                                    <h2 className="text-4xl md:text-5xl font-bold mb-20 text-center text-slate-900">Execution Roadmap</h2>
+                                </AnimatedItem>
+                                <div className="flex flex-col md:flex-row justify-between items-start w-full relative">
+                                    {/* Connecting Line */}
+                                    <div className="absolute top-8 left-0 w-full h-1 bg-gradient-to-r from-blue-300 to-slate-200 hidden md:block rounded-full"></div>
+                                    
+                                    {[
+                                        { phase: "Phase 1", time: "Foundation", tasks: ["PWA Launch", "Monetization"], color: "bg-blue-500" },
+                                        { phase: "Phase 2", time: "Expansion", tasks: ["Premium Guide", "Analytics"], color: "bg-indigo-500" },
+                                        { phase: "Phase 3", time: "Ecosystem", tasks: ["Training Hubs", "Enterprise"], color: "bg-slate-800" }
+                                    ].map((p, i) => (
+                                        <AnimatedItem key={i} delay={200 + (i * 300)} type="up">
+                                            <div className="relative flex flex-col items-center text-center md:w-64">
+                                                <div className={`w-16 h-16 ${p.color} rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white font-bold text-xl relative z-10 mb-6`}>{i+1}</div>
+                                                <div className="glass-panel p-6 rounded-2xl w-full bg-white/60">
+                                                    <div className="text-[#4361EE] font-bold text-xs uppercase mb-2">{p.phase}</div>
+                                                    <h3 className="text-2xl font-bold mb-4 text-slate-900">{p.time}</h3>
+                                                    {p.tasks.map(t => (
+                                                        <div key={t} className="text-slate-500 text-sm py-1 border-b border-slate-100 last:border-0">{t}</div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </AnimatedItem>
+                                    ))}
+                                </div>
+                            </div>
+                        </Slide>
+
+                        {/* Slide 9: Vision */}
+                        <Slide>
+                            <div className="text-center max-w-5xl relative">
+                                <AnimatedItem delay={0} type="zoom">
+                                    <div className="text-9xl text-[#4361EE] absolute -top-20 -left-10 opacity-10 font-serif">“</div>
+                                </AnimatedItem>
+                                <AnimatedItem delay={200} type="up">
+                                    <h2 className="text-4xl md:text-6xl font-light leading-tight mb-12 text-slate-900">
+                                        Education produces degrees.<br/>
+                                        Skills produce jobs.<br/>
+                                        <span className="font-bold text-[#4361EE]">Decisions shape futures.</span>
+                                    </h2>
+                                </AnimatedItem>
+                                <AnimatedItem delay={400} type="up">
+                                    <p className="text-2xl text-slate-500">
+                                        EDVOCATE is building the system that powers those decisions.
+                                    </p>
+                                </AnimatedItem>
+                            </div>
+                        </Slide>
+                        
+                         {/* Slide 10: Contact */}
+                         <Slide>
+                            <AnimatedItem type="zoom">
+                                <div className="glass-panel p-20 rounded-[3rem] text-center border-white shadow-xl bg-white/30">
+                                    <h2 className="text-5xl font-bold mb-12 text-slate-900">Let's Build the Infrastructure</h2>
+                                    <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
+                                        <a href="mailto:hello@edvocate.in" className="glass-card px-10 py-5 rounded-full text-xl font-bold flex items-center gap-4 bg-white/80 hover:bg-[#4361EE] hover:text-white hover:border-[#4361EE] text-slate-800 transition-all animate-float">
+                                            <Mail /> hello@edvocate.in
+                                        </a>
+                                        <div className="glass-card px-10 py-5 rounded-full text-xl font-bold flex items-center gap-4 bg-white/80 text-slate-800 animate-float-delayed">
+                                            <Globe /> www.edvocate.in
                                         </div>
-                                    </Reveal>
+                                    </div>
+                                    <div className="mt-12 text-slate-400">
+                                        &copy; 2026 Edvocate Technologies.
+                                    </div>
                                 </div>
+                            </AnimatedItem>
+                        </Slide>
 
-                                <div className="text-center md:text-left">
-                                    <Reveal delay={300}>
-                                        <Award className="w-20 h-20 text-blue-300 mb-8 mx-auto md:mx-0 drop-shadow-[0_0_15px_rgba(147,197,253,0.5)]" />
-                                        <h2 className="text-4xl font-bold mb-8">The Final Vision</h2>
-                                        <p className="text-2xl text-blue-100 leading-relaxed mb-10 font-light">
-                                            Education produces degrees. <br/>Skills produce jobs. <br/>
-                                            <span className="text-white font-bold underline decoration-blue-400 underline-offset-8 decoration-4">Decisions shape futures.</span>
-                                        </p>
-                                        <p className="text-lg text-blue-200 mb-12 max-w-md mx-auto md:mx-0">
-                                            EDVOCATE is building the system that powers those decisions for the next generation of India.
-                                        </p>
-                                        <button onClick={() => window.location.href = 'mailto:hello@edvocate.in'} className="bg-white text-blue-700 px-10 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all shadow-[0_10px_30px_-10px_rgba(255,255,255,0.3)] hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(255,255,255,0.4)]">
-                                            Schedule Investor Meeting
-                                        </button>
-                                    </Reveal>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Footer */}
-                    <footer className="bg-slate-950 py-16 text-slate-500 text-sm text-center border-t border-slate-900">
-                        <div className="max-w-7xl mx-auto px-6">
-                            <div className="flex items-center justify-center gap-0 mb-6 opacity-50 hover:opacity-100 transition-opacity duration-300">
-                                <div className="bg-[#4361EE] text-white p-1.5 px-2 rounded-l-lg font-bold text-sm">ED</div>
-                                <span className="bg-slate-800 text-slate-300 p-1.5 px-2 rounded-r-lg font-bold text-sm">VOCATE</span>
-                            </div>
-                            <p className="mb-4">© 2026 Edvocate Technologies. India's Career Decision Infrastructure.</p>
-                            <a href="mailto:hello@edvocate.in" className="text-slate-600 hover:text-white transition-colors border-b border-transparent hover:border-slate-600 pb-0.5">hello@edvocate.in</a>
-                        </div>
-                    </footer>
+                    </div>
                 </div>
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<EdvocatePitch />);
+        root.render(<Presentation />);
     </script>
 </body>
 </html>
