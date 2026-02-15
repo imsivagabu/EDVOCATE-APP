@@ -74,49 +74,15 @@
         .delay-400 { transition-delay: 400ms; }
         .delay-500 { transition-delay: 500ms; }
 
-        /* --- Chart Specific Animations --- */
+        /* Chart Animations */
+        .grow-width { width: 0; transition: width 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s; }
+        .active .grow-width { width: var(--target-width); }
         
-        /* Bars */
         .grow-height { height: 0; transition: height 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s; }
         .active .grow-height { height: var(--target-height); }
 
-        /* Circles (Stroke) */
-        .draw-circle { 
-            stroke-dasharray: 1000; 
-            stroke-dashoffset: 1000; 
-            transition: stroke-dashoffset 2s ease-out 0.5s; 
-        }
+        .draw-circle { stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: stroke-dashoffset 2s ease-out 0.5s; }
         .active .draw-circle { stroke-dashoffset: 0; }
-
-        /* Circles (Fill) */
-        .fade-fill {
-            opacity: 0;
-            transition: opacity 1s ease-out 1.5s; /* Delays fill until stroke is drawing */
-        }
-        .active .fade-fill { opacity: 1; }
-
-        /* Scale Dots */
-        .scale-dot {
-            transform: scale(0);
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy pop */
-        }
-        .active .scale-dot { transform: scale(1); }
-
-        /* Gauge Segments */
-        .gauge-seg {
-            stroke-dasharray: 100 100; /* Placeholder, overridden inline */
-            stroke-dashoffset: 100;    /* Hidden */
-            transition: stroke-dashoffset 1.5s ease-out;
-        }
-        .active .gauge-seg { stroke-dashoffset: 0; }
-
-        /* Gauge Needle */
-        .gauge-needle {
-            transform: rotate(-90deg);
-            transition: transform 2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s;
-            transform-origin: 100px 100px;
-        }
-        .active .gauge-needle { transform: rotate(45deg); }
 
         .noise {
             position: absolute;
@@ -216,28 +182,17 @@
             <div className="relative w-full h-full flex items-center justify-center">
                 <svg viewBox="0 0 200 120" className="w-[120%] h-auto">
                     <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1f2937" strokeWidth="20" strokeLinecap="round" />
-                    
-                    {/* Green Segment */}
-                    <path d="M 20 100 A 80 80 0 0 1 60 44" fill="none" stroke="#10B981" strokeWidth="20" 
-                          strokeDasharray="100" className="gauge-seg" style={{transitionDelay: '0.5s'}} />
-                    
-                    {/* Yellow Segment */}
-                    <path d="M 62 42 A 80 80 0 0 1 100 20" fill="none" stroke="#FBBF24" strokeWidth="20" 
-                          strokeDasharray="100" className="gauge-seg" style={{transitionDelay: '0.8s'}} />
-                    
-                    {/* Red Segment */}
-                    <path d="M 102 20 A 80 80 0 0 1 180 100" fill="none" stroke="#DC2626" strokeWidth="20" 
-                          strokeDasharray="200" className="gauge-seg" style={{transitionDelay: '1.1s'}} />
-                    
-                    {/* Needle */}
-                    <g className="gauge-needle">
+                    <path d="M 20 100 A 80 80 0 0 1 60 44" fill="none" stroke="#10B981" strokeWidth="20" strokeDasharray="100" strokeDashoffset="100" className="animate-[dash_1s_ease-out_forwards]" style={{animationDelay: '0.5s'}} />
+                    <path d="M 62 42 A 80 80 0 0 1 100 20" fill="none" stroke="#FBBF24" strokeWidth="20" strokeDasharray="100" strokeDashoffset="100" className="animate-[dash_1s_ease-out_forwards]" style={{animationDelay: '1s'}} />
+                    <path d="M 102 20 A 80 80 0 0 1 180 100" fill="none" stroke="#DC2626" strokeWidth="20" strokeDasharray="200" strokeDashoffset="200" className="animate-[dash_1.5s_ease-out_forwards]" style={{animationDelay: '1.5s'}} />
+                    <g className="origin-[100px_100px] animate-[rotateNeedle_2s_ease-out_forwards]" style={{transform: 'rotate(-90deg)'}}>
                          <polygon points="100,100 95,100 100,20 105,100" fill="white" />
                          <circle cx="100" cy="100" r="5" fill="white" />
                     </g>
-                    
                     <text x="100" y="80" textAnchor="middle" fill="#9CA3AF" fontSize="8" className="uppercase tracking-widest">Mismatch Risk</text>
                     <text x="100" y="65" textAnchor="middle" fill="#FFFFFF" fontSize="16" fontWeight="bold">CRITICAL</text>
                 </svg>
+                <style>{`@keyframes dash { to { stroke-dashoffset: 0; } } @keyframes rotateNeedle { to { transform: rotate(45deg); } }`}</style>
             </div>
         );
 
@@ -452,17 +407,17 @@
                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#111_0%,_#000_100%)]"></div>
                  <div className="relative z-10 space-y-20">
                      <div className="space-y-4">
-                        <h2 className="animate-in delay-100 text-[100px] font-bold text-gray-700 tracking-tighter leading-none">Great Talent.</h2>
+                        <h2 className="animate-in delay-100 text-[100px] font-bold text-gray-700 tracking-tighter leading-none">Strong Potential.</h2>
                         <h2 className="animate-in delay-200 text-[100px] font-bold text-white tracking-tighter leading-none relative inline-block">
-                            Wrong Decisions.
+                            Poorly Supported Decisions.
                             <div className="absolute bottom-4 left-0 w-full h-6 bg-orange-600/30 -skew-x-12"></div>
                         </h2>
                      </div>
                      <div className="animate-in delay-300">
                          <div className="inline-flex items-center gap-8 px-16 py-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-2xl hover:bg-white/10 transition-colors cursor-pointer group">
                              <div className="h-6 w-6 rounded-full bg-orange-500 shadow-[0_0_20px_#F97316] group-hover:scale-125 transition-transform"></div>
-                             <span className="text-4xl text-gray-300 font-light tracking-wide">
-                                 EDVOCATE helps you <strong className="text-white font-bold border-b-2 border-orange-500">Make Decisions Right.</strong>
+                             <span className="text-4xl text-gray-300 font-light tracking-wide text-center">
+                                 EDVOCATE helps improve the quality of <br/><strong className="text-white font-bold border-b-2 border-orange-500">academic and career decisions.</strong>
                              </span>
                          </div>
                      </div>
@@ -477,20 +432,20 @@
         const slides = [
             {
                 type: "hero",
-                title: "The Career Decision Crisis",
-                subtitle: "Introducing EDVOCATE: The Decision Engine",
+                title: "The Career Decision Gap",
+                subtitle: "Introducing EDVOCATE: A Decision Support Engine",
                 tagline: "CONFIDENTIAL"
             },
             {
                 type: "section",
                 part: "01",
                 title: "The Context",
-                subtitle: "Why India is facing a generational decision crisis."
+                subtitle: "Why academic and career decisions in India lack structured support."
             },
             {
                 type: "data",
                 title: "Premature Commitment",
-                body: "Indian students are structurally forced to make irreversible career decisions at Age 15, limiting exploration.",
+                body: "Indian students are required to make early academic choices around age 15, often before adequate exploration is possible.",
                 stat: "Age 15",
                 statLabel: "Decision Lock-in",
                 source: "Ministry of Education (AISHE)",
@@ -499,7 +454,7 @@
             {
                 type: "data",
                 title: "The Guidance Void",
-                body: "With a student-to-counselor ratio of ~3000:1, professional guidance is statistically non-existent in Indian schools.",
+                body: "With a student-to-counselor ratio of ~3000:1, professional guidance capacity is severely constrained in most Indian schools.",
                 stat: "3000:1",
                 statLabel: "Student Ratio",
                 source: "IC3 Institute Report",
@@ -508,7 +463,7 @@
             {
                 type: "data",
                 title: "Systemic Mismatch",
-                body: "The result is a 'Critical Risk' environment where nearly half of all graduates regret their core field of study.",
+                body: "The result is a high-risk decision environment, where a significant share of graduates report dissatisfaction with their chosen field of study.",
                 stat: "45%",
                 statLabel: "Regret Rate",
                 source: "National Employability Report",
@@ -518,12 +473,12 @@
                 type: "section",
                 part: "02",
                 title: "The Solution",
-                subtitle: "Engineering better outcomes through data."
+                subtitle: "Improving decision quality through structured analysis."
             },
             {
                 type: "data",
                 title: "The Decision Engine",
-                body: "EDVOCATE replaces intuition with engineering. A proprietary 3-stage process maps talent to market reality.",
+                body: "EDVOCATE replaces ad-hoc guidance with structured analysis. A three-stage decision support process evaluates academic pathways against individual context.",
                 stat: "3-Stage",
                 statLabel: "Proprietary Algo",
                 source: "Internal Framework",
@@ -532,7 +487,7 @@
             {
                 type: "data",
                 title: "The Trust Protocol",
-                body: "We are India's first privacy-centric platform. No lead sellers. No sponsored content. No Ads. The student is the customer, not the product.",
+                body: "We are a privacy-first education guidance platform. No lead sellers. No sponsored content. No Ads. The student is the customer, not the product.",
                 stat: "100%",
                 statLabel: "Data Integrity",
                 source: "EDVOCATE Charter",
@@ -542,7 +497,7 @@
                 type: "section",
                 part: "03",
                 title: "The Opportunity",
-                subtitle: "Defining the Scale & Market Potential."
+                subtitle: "Understanding scale and long-term demand."
             },
             {
                 type: "data",
@@ -556,7 +511,7 @@
             {
                 type: "data",
                 title: "Market Sizing",
-                body: "Focusing on the paying urban/semi-urban segment (SAM) reveals a $2.5 Billion immediate opportunity within a $10 Billion TAM.",
+                body: "Focusing on the paying urban/semi-urban segment (SAM) indicates a large serviceable opportunity within a broader education guidance market.",
                 stat: "$2.5B",
                 statLabel: "Serviceable Market",
                 source: "EdTech Market Analysis 2025",
